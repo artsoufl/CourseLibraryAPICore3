@@ -25,9 +25,10 @@ namespace CourseLibrary.API.Controllers
         [HttpGet()]
         [HttpHead] // not sure what this does?
         // the string is used for filtering http://localhost:51044/api/authors?mainCategory=Rum
-        public ActionResult<IEnumerable<AuthorDto>> GetAuthors(string mainCategory)
+        // http://localhost:51044/api/authors?mainCategory=Rum&searchQuery=a
+        public ActionResult<IEnumerable<AuthorDto>> GetAuthors(string mainCategory, string searchQuery)
         {
-            var authorsFromRepo = _courseLibraryRepository.GetAuthors(mainCategory);
+            var authorsFromRepo = _courseLibraryRepository.GetAuthors(mainCategory, searchQuery);
 
             return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
         }
