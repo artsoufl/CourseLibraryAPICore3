@@ -49,6 +49,18 @@ namespace CourseLibrary.API
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                // In production display a default message instead of the error
+                app.UseExceptionHandler(appbuilder =>
+                {
+                    appbuilder.Run(async context => 
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("Yolo. An unexpected fault happened. Try again later.");
+                    });
+                });
+            }
 
             // marks the position in the middleware pipeline where a routing decision is made
             app.UseRouting(); 
