@@ -47,6 +47,7 @@ namespace CourseLibrary.API.Controllers
             return Ok(_mapper.Map<AuthorDto>(author));
         }
 
+        // The CreatedAtRoute method is intended to return a URI to the newly created resource 
         [HttpPost]
         public ActionResult<AuthorDto> CreateAuthor(AuthorForCreationDto author)
         {
