@@ -20,6 +20,8 @@ namespace CourseLibrary.API.Profiles
                 opt => opt.MapFrom(src => src.DateOfBirth.GetCurrentAge()));
 
             CreateMap<Models.AuthorDto, Entities.Author>();
+
+            CreateMap<Models.AuthorForCreationDto, Entities.Author>().ReverseMap();
         }
     }
 }
