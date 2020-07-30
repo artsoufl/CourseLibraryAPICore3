@@ -48,6 +48,7 @@ namespace CourseLibrary.API.Controllers
         }
 
         // The CreatedAtRoute method is intended to return a URI to the newly created resource 
+        // In the post body we could add or not courses and they will be serialized and added
         [HttpPost]
         public ActionResult<AuthorDto> CreateAuthor(AuthorForCreationDto author)
         {
