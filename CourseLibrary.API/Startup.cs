@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Serialization;
 using System;
 
 namespace CourseLibrary.API
@@ -31,7 +32,14 @@ namespace CourseLibrary.API
            {
                // if xml is not supported and the api call has header to accept xml then returns error
                setupAction.ReturnHttpNotAcceptable = true;  
-           }).AddXmlDataContractSerializerFormatters()     // support xml
+           })
+           // the order matters, if addnewtonsoft is after the addxml then the default return form will be xml instead of json
+           .AddNewtonsoftJson(setupAction =>
+           {
+               setupAction.SerializerSettings.ContractResolver =
+                  new CamelCasePropertyNamesContractResolver();
+           })
+          .AddXmlDataContractSerializerFormatters()     // support xml
            .ConfigureApiBehaviorOptions(setupAction =>
            {
                setupAction.InvalidModelStateResponseFactory = context =>
