@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CourseLibrary.API.Helpers;
 using CourseLibrary.API.Models;
 using CourseLibrary.API.ResourceParameters;
 using CourseLibrary.API.Services;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CourseLibrary.API.Controllers
@@ -23,13 +25,33 @@ namespace CourseLibrary.API.Controllers
             _mapper = mapper ?? throw new ArgumentException(nameof(mapper));
         }
 
-        [HttpGet()]
+        [HttpGet(Name = "GetAuthors")]
         [HttpHead] // not sure what this does?
         // the string is used for filtering http://localhost:51044/api/authors?mainCategory=Rum
         // http://localhost:51044/api/authors?mainCategory=Rum&searchQuery=a
         public ActionResult<IEnumerable<AuthorDto>> GetAuthors([FromQuery] AuthorsResourceParameters authorsResourceParam)
         {
             var authorsFromRepo = _courseLibraryRepository.GetAuthors(authorsResourceParam);
+
+            var previousPageLink = authorsFromRepo.HasPrevious ?
+                CreateAuthorsResourceUri(authorsResourceParam,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = authorsFromRepo.HasNext ?
+                CreateAuthorsResourceUri(authorsResourceParam,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = authorsFromRepo.TotalCount,
+                pageSize = authorsFromRepo.PageSize,
+                currentPage = authorsFromRepo.CurrentPage,
+                totalPages = authorsFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
             return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
         }
@@ -85,6 +107,47 @@ namespace CourseLibrary.API.Controllers
             _courseLibraryRepository.Save();
 
             return NoContent();
+        }
+
+        /// <summary>
+        /// Create the metadata
+        /// </summary>
+        /// <param name="authorsResourceParameters"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private string CreateAuthorsResourceUri(AuthorsResourceParameters authorsResourceParameters, ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return Url.Link("GetAuthors",
+                      new
+                      {
+                          pageNumber = authorsResourceParameters.PageNumber - 1,
+                          pageSize = authorsResourceParameters.PageSize,
+                          mainCategory = authorsResourceParameters.MainCategory,
+                          searchQuery = authorsResourceParameters.SearchQuery
+                      });
+                case ResourceUriType.NextPage:
+                    return Url.Link("GetAuthors",
+                      new
+                      {
+                          pageNumber = authorsResourceParameters.PageNumber + 1,
+                          pageSize = authorsResourceParameters.PageSize,
+                          mainCategory = authorsResourceParameters.MainCategory,
+                          searchQuery = authorsResourceParameters.SearchQuery
+                      });
+
+                default:
+                    return Url.Link("GetAuthors",
+                    new
+                    {
+                        pageNumber = authorsResourceParameters.PageNumber,
+                        pageSize = authorsResourceParameters.PageSize,
+                        mainCategory = authorsResourceParameters.MainCategory,
+                        searchQuery = authorsResourceParameters.SearchQuery
+                    });
+            }
         }
     }
 }
