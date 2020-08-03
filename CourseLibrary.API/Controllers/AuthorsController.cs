@@ -19,21 +19,30 @@ namespace CourseLibrary.API.Controllers
         private readonly ICourseLibraryRepository _courseLibraryRepository;
         private readonly IMapper _mapper;
         private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyCheckerService _propertyCheckerService;
 
-        public AuthorsController(ICourseLibraryRepository courseRepo, IMapper mapper, IPropertyMappingService propertyMappingService)
+        public AuthorsController(ICourseLibraryRepository courseRepo, IMapper mapper,
+            IPropertyMappingService propertyMappingService, IPropertyCheckerService propertyChecker)
         {
             _courseLibraryRepository = courseRepo ?? throw new ArgumentException(nameof(courseRepo));
             _mapper = mapper ?? throw new ArgumentException(nameof(mapper));
             _propertyMappingService = propertyMappingService ?? throw new ArgumentException(nameof(propertyMappingService));
+            _propertyCheckerService = propertyChecker ?? throw new ArgumentException(nameof(propertyChecker));
         }
 
         [HttpGet(Name = "GetAuthors")]
         [HttpHead] // not sure what this does?
         // the string is used for filtering http://localhost:51044/api/authors?mainCategory=Rum
         // http://localhost:51044/api/authors?mainCategory=Rum&searchQuery=a
-        public ActionResult<IEnumerable<AuthorDto>> GetAuthors([FromQuery] AuthorsResourceParameters authorsResourceParam)
+        public IActionResult GetAuthors([FromQuery] AuthorsResourceParameters authorsResourceParam)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<AuthorDto, Entities.Author>(authorsResourceParam.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            // if one of the fields is invalid then return bad request
+            if (!_propertyCheckerService.TypeHasProperties<AuthorDto>(authorsResourceParam.Fields))
             {
                 return BadRequest();
             }
@@ -60,12 +69,18 @@ namespace CourseLibrary.API.Controllers
 
             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
-            return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
+            return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo)
+                .ShapeData(authorsResourceParam.Fields));
         }
 
         [HttpGet("{authorId}", Name = "GetAuthor")]
-        public IActionResult GetAuthor(Guid authorId)
+        public IActionResult GetAuthor(Guid authorId, string fields)
         {
+            if (!_propertyCheckerService.TypeHasProperties<AuthorDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var author = _courseLibraryRepository.GetAuthor(authorId);
 
             if (author == null)
@@ -73,7 +88,7 @@ namespace CourseLibrary.API.Controllers
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<AuthorDto>(author));
+            return Ok(_mapper.Map<AuthorDto>(author).ShapeData(fields));
         }
 
         // The CreatedAtRoute method is intended to return a URI to the newly created resource 
@@ -130,6 +145,7 @@ namespace CourseLibrary.API.Controllers
                     return Url.Link("GetAuthors",
                       new
                       {
+                          fields = authorsResourceParameters.Fields,
                           orderBy = authorsResourceParameters.OrderBy,
                           pageNumber = authorsResourceParameters.PageNumber - 1,
                           pageSize = authorsResourceParameters.PageSize,
@@ -140,6 +156,7 @@ namespace CourseLibrary.API.Controllers
                     return Url.Link("GetAuthors",
                       new
                       {
+                          fields = authorsResourceParameters.Fields,
                           orderBy = authorsResourceParameters.OrderBy,
                           pageNumber = authorsResourceParameters.PageNumber + 1,
                           pageSize = authorsResourceParameters.PageSize,
@@ -151,6 +168,7 @@ namespace CourseLibrary.API.Controllers
                     return Url.Link("GetAuthors",
                     new
                     {
+                        fields = authorsResourceParameters.Fields,
                         orderBy = authorsResourceParameters.OrderBy,
                         pageNumber = authorsResourceParameters.PageNumber,
                         pageSize = authorsResourceParameters.PageSize,
