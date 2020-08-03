@@ -32,6 +32,7 @@ namespace CourseLibrary.API.DbContexts
                     FirstName = "Nancy",
                     LastName = "Swashbuckler Rye",
                     DateOfBirth = new DateTime(1668, 5, 21),
+                    DateOfDeath = new DateTime(1750, 7, 23),
                     MainCategory = "Rum"
                 },
                 new Author()
@@ -40,6 +41,7 @@ namespace CourseLibrary.API.DbContexts
                     FirstName = "Eli",
                     LastName = "Ivory Bones Sweet",
                     DateOfBirth = new DateTime(1701, 12, 16),
+                    DateOfDeath = new DateTime(1750, 7, 23),
                     MainCategory = "Singing"
                 },
                 new Author()
@@ -48,6 +50,7 @@ namespace CourseLibrary.API.DbContexts
                     FirstName = "Arnold",
                     LastName = "The Unseen Stafford",
                     DateOfBirth = new DateTime(1702, 3, 6),
+                    DateOfDeath = new DateTime(1750, 7, 23),
                     MainCategory = "Singing"
                 },
                 new Author()
@@ -56,6 +59,7 @@ namespace CourseLibrary.API.DbContexts
                     FirstName = "Seabury",
                     LastName = "Toxic Reyson",
                     DateOfBirth = new DateTime(1690, 11, 23),
+                    DateOfDeath = new DateTime(1750, 7, 23),
                     MainCategory = "Maps"
                 },
                 new Author()
@@ -64,6 +68,7 @@ namespace CourseLibrary.API.DbContexts
                     FirstName = "Rutherford",
                     LastName = "Fearless Cloven",
                     DateOfBirth = new DateTime(1723, 4, 5),
+                    DateOfDeath = new DateTime(1750, 7, 23),
                     MainCategory = "General debauchery"
                 },
                 new Author()
@@ -72,6 +77,7 @@ namespace CourseLibrary.API.DbContexts
                     FirstName = "Atherton",
                     LastName = "Crow Ridley",
                     DateOfBirth = new DateTime(1721, 10, 11),
+                    DateOfDeath = new DateTime(1750, 7, 23),
                     MainCategory = "Rum"
                 }
                 );
