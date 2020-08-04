@@ -29,10 +29,17 @@ namespace CourseLibrary.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-           services.AddControllers(setupAction =>
+            services.AddResponseCaching();
+
+            services.AddControllers(setupAction =>
            {
                // if xml is not supported and the api call has header to accept xml then returns error
-               setupAction.ReturnHttpNotAcceptable = true;  
+               setupAction.ReturnHttpNotAcceptable = true;
+               setupAction.CacheProfiles.Add("240SecondsCacheProfile",
+                                                new CacheProfile()
+                                                {
+                                                    Duration = 240
+                                                });
            })
            // the order matters, if addnewtonsoft is after the addxml then the default return form will be xml instead of json
            .AddNewtonsoftJson(setupAction =>
@@ -131,6 +138,8 @@ namespace CourseLibrary.API
                     });
                 });
             }
+
+            app.UseResponseCaching(); // should happen before routing
 
             // marks the position in the middleware pipeline where a routing decision is made
             app.UseRouting(); 

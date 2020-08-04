@@ -16,6 +16,7 @@ namespace CourseLibrary.API.Controllers
 {
     [ApiController]
     [Route("api/authors/{authorId}/courses")]
+    [ResponseCache(CacheProfileName = "240SecondsCacheProfile")] // the profile is defined in startup
     public class CoursesController : ControllerBase
     {
 
@@ -40,7 +41,16 @@ namespace CourseLibrary.API.Controllers
             return Ok(_mapper.Map<IEnumerable<CourseDto>>(coursesForAuthorFromRepo));
         }
 
+        /// <summary>
+        /// For caching, I will see the header in the response
+        /// Also, I need to disable the Send no-cache header on postman
+        /// So, it will be cached for the duration set. which means that the breakpoint wont be hit on api.
+        /// </summary>
+        /// <param name="authorId"></param>
+        /// <param name="courseId"></param>
+        /// <returns></returns>
         [HttpGet("{courseId}", Name = "GetCourseForAuthor")]
+        [ResponseCache(Duration = 120)]
         public ActionResult<CourseDto> GetCourseForAuthor(Guid authorId, Guid courseId)
         {
             if (!_courseLibraryRepository.AuthorExists(authorId))
